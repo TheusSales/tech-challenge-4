@@ -112,9 +112,38 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 
 ## Parte C — Ordem de execução (checkpoints, cada um = 1 commit)
 
-> **Escopo imediato desta sessão:** apenas **CP0** abaixo — semear o repo `tech-challenge-4` com este plano e subir para o GitHub, para que o desenvolvimento continue em outro computador. Os demais checkpoints ficam registrados como roadmap.
+### Progresso
 
-**CP0 — Seed do repo mobile (fazer agora)**
+| CP | Status | Commit |
+|---|---|---|
+| CP0 — seed do repo mobile | ✅ concluído | `31de80d` (tech-challenge-4) |
+| CP1 — deps + scaffold de auth | ✅ concluído | `be515ff` (backend) |
+| CP2 — auth JWT + seed | ✅ concluído | `a277817` (backend) |
+| CP3 — professores + posts protegidos | ✅ concluído | `b25b3f5` (backend) |
+| CP4 — alunos | ✅ concluído | `3890c0e` (backend) |
+| — correção do seed | ✅ concluído | `dc36d89` (backend) |
+| CP5 — bootstrap Expo | ⬜ **próximo** | — |
+| CP6–CP12 | ⬜ pendentes | — |
+
+**Backend concluído e publicado** em `TheusSales/8fsdt-tech-challenge-2` (branch `main`). 77 testes verdes, CI do GitHub Actions passando. Todos os endpoints da Parte A foram validados contra um Postgres real — ver "Estado verificado" abaixo.
+
+### Desvios em relação ao plano original
+
+Registrados porque afetam quem for retomar o trabalho:
+
+- **`@types/bcryptjs` não é usado.** O `bcryptjs` v3 já traz os próprios tipos; o pacote `@types/bcryptjs` virou um stub vazio e foi removido.
+- **`schema.sql` inclui a tabela `posts`**, não só `professors`/`students`. O repositório não versionava DDL nenhuma, então o script cria o banco inteiro do zero. A definição de `posts` espelha a tabela que já existia (`varchar(150)`/`varchar(100)`, `DEFAULT CURRENT_TIMESTAMP`).
+- **`src/types/express.d.ts`** foi criado (não estava no plano) para tipar `req.professor` injetado pelo `requireAuth`.
+- **Bug corrigido no seed:** o `INSERT ... SELECT` com `WHERE NOT EXISTS` reutiliza `$1` em dois contextos e o Postgres recusava o parâmetro (`text` vs `varchar`). Exigiu casts explícitos. **Os testes não pegaram isso** porque mockam os models — lição a levar para o mobile: validar SQL com o banco de pé.
+- **`app.use(cors())`** estava pendente no working tree do backend e entrou junto no CP2; é necessário para o app mobile consumir a API.
+
+### Estado verificado (contra Postgres real, não mock)
+
+Login com `admin@fiap.com` / `admin123`; senha errada → 401; `/auth/me`, `/professors`, `/students` e `/posts/admin` paginados; CRUD de professor com e-mail duplicado → 409 e auto-exclusão → 409; update de professor **sem** senha preserva a senha atual (login segue funcionando); CRUD de aluno com `ra` opcional; create/edit/delete de post autenticado; leitura pública sem token → 200; escrita sem token → 401. Seed rodado duas vezes seguidas sem duplicar dados.
+
+---
+
+**CP0 — Seed do repo mobile** ✅
 1. `mkdir -p ~/Projetos/tech-challenge-4/docs`
 2. Copiar este arquivo de plano para `~/Projetos/tech-challenge-4/docs/PLAN.md`.
 3. Criar `README.md` mínimo apontando para `docs/PLAN.md` + status "planning".
@@ -124,11 +153,12 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 
 Backend primeiro (mobile bloqueia nele).
 
-1. **CP1** — deps + scaffold (`middlewares/`, `utils/`, `scripts/schema.sql`, `.env.example`). `chore: add auth utilities scaffolding`.
-2. **CP2** — models/controllers/routes de auth + seed + testes de auth. `feat: JWT auth with professor login`.
-3. **CP3** — Professors CRUD + `requireAuth` nos posts write + `GET /posts/admin` + testes. `feat: professors CRUD and protected post writes`.
-4. **CP4** — Students CRUD + testes. `feat: students CRUD`. Push do backend.
-5. **CP5** — bootstrap Expo, store, navegadores vazios, theme portado, `useDebounce` portado, RTK Query base com Bearer. Init `TheusSales/tech-challenge-4` e primeiro push. `chore: bootstrap Expo app`.
+1. **CP1** ✅ — deps + scaffold (`middlewares/`, `utils/`, `scripts/schema.sql`, `.env.example`). `chore: add auth utilities scaffolding`.
+2. **CP2** ✅ — models/controllers/routes de auth + seed + testes de auth. `feat: JWT auth with professor login`.
+3. **CP3** ✅ — Professors CRUD + `requireAuth` nos posts write + `GET /posts/admin` + testes. `feat: professors CRUD and protected post writes`.
+4. **CP4** ✅ — Students CRUD + testes. `feat: students CRUD`. Push do backend.
+5. **CP5** ⬅️ **próximo** — bootstrap Expo, store, navegadores vazios, theme portado, `useDebounce` portado, RTK Query base com Bearer. Primeiro push do app. `chore: bootstrap Expo app`.
+   > O repo já existe e já tem `README.md`, `docs/` e `.gitignore`. O `create-expo-app` espera diretório vazio — gerar em pasta temporária e **mesclar**, preservando o README e o `docs/`, e fundindo o `.gitignore` do Expo com o atual em vez de substituí-lo.
 6. **CP6** — `authSlice`, `authApi`, SecureStore + hydrate, `LoginScreen`, gate no RootNavigator. Testar contra backend seedado. `feat: professor login with JWT persistence`.
 7. **CP7** — `PostListScreen` (busca com debounce) + `PostDetailScreen` + componentes base (`ListItem`, `Card`, `EmptyState`, `LoadingView`, `ErrorView`). `feat: post list and detail`.
 8. **CP8** — `AdminHomeScreen` + `PostFormScreen` (create+edit) + delete com `Alert.alert`. `feat: admin posts management`.
@@ -143,11 +173,23 @@ Regra em todos os commits (backend e mobile): **sem trailer `Co-Authored-By: Cla
 
 ## Parte D — Verificação end-to-end
 
-**Backend** (`~/Projetos/8fsdt-tech-challenge-2`):
+### Requisitos da máquina de desenvolvimento
+
+- **Node 20+** para o app Expo (o backend roda a partir do 18). Se o sistema tiver uma versão antiga vinda do apt, instalar via nvm — não precisa de `sudo` e não substitui o Node do sistema:
+  ```bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
+  # reabra o terminal, então:
+  nvm install --lts && nvm alias default 'lts/*'
+  ```
+  Em terminais já abertos o zsh pode continuar servindo o Node antigo do cache — `rehash` resolve.
+- **Docker** com o container do Postgres de pé (`docker compose up -d` na pasta do backend). Em WSL, exige a integração com o WSL ativada nas configurações do Docker Desktop.
+- **`.env` do backend** criado a partir do `.env.example`, com `JWT_SECRET` preenchido. O `.env` não é versionado, então precisa ser recriado em cada máquina.
+
+**Backend** (`~/Projetos/8fsdt-tech-challenge-2`) — ✅ verificado:
 1. `docker compose up -d`
-2. `psql -h localhost -U postgres -d blog_tech -f src/scripts/schema.sql`
-3. `npm run seed` → cria professor admin
-4. `npm test` → todas as suites verdes
+2. `docker exec -i postgres_blog psql -U postgres -d blog_tech < src/scripts/schema.sql`
+3. `npm run seed` → cria professor admin (idempotente)
+4. `npm test` → 77 testes verdes
 5. `npm run dev` → `http://localhost:3000`
 6. Smoke:
    ```
