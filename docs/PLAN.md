@@ -124,13 +124,14 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | — correção do seed | ✅ concluído | `dc36d89` (backend) |
 | CP5 — bootstrap Expo | ✅ concluído | `bc50c80` (tech-challenge-4) |
 | CP6 — login + persistência | 🟡 código pronto, falta rodar em dispositivo | — |
-| CP7–CP12 | ⬜ pendentes | — |
+| CP7 — lista e detalhe de posts | ✅ concluído | `HEAD` (tech-challenge-4) |
+| CP8–CP12 | ⬜ pendentes | — |
 
-> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 54 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
+> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 74 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
 
 ### Testes (antecipados do CP11)
 
-Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **54 testes**, `npm test`.
+Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **74 testes**, `npm test`.
 
 Cobrem `authSlice`, validadores, tradução de erro da API, `useDebounce`, o fluxo de auth inteiro contra `fetch` mockado (injeção do Bearer, logout no 401, `hydrateAuth`) e a `LoginScreen` ponta a ponta. Os mocks usam respostas copiadas de chamadas reais, então mudança de contrato quebra os testes.
 
@@ -209,7 +210,12 @@ Backend primeiro (mobile bloqueia nele).
 6. **CP6** 🟡 — `LoginScreen` com `react-hook-form` + `useLoginMutation`, gravação no SecureStore, botão "Sair" no cabeçalho do admin. `feat: professor login with JWT persistence`.
    > Decisão: o descarte do cache do RTK Query no logout ficou num **listener middleware** que reage à action `logout` (`src/store/listeners.ts`), e não no botão. Assim vale também para o logout automático do 401, sem duplicar a lógica. A alternativa (interceptar a action no reducer raiz) exigia um cast feio, porque zerar a fatia da API sem zerar `auth` não é expressável nos tipos do `combineReducers` — se fosse zerado tudo, `hydrating` voltaria a `true` e o app travaria no spinner.
    > Falta o teste em dispositivo — ver a nota na tabela de progresso.
-7. **CP7** — `PostListScreen` (busca com debounce) + `PostDetailScreen` + componentes base (`ListItem`, `Card`, `EmptyState`, `LoadingView`, `ErrorView`). `feat: post list and detail`.
+7. **CP7** ✅ — `PostListScreen` (busca com debounce) + `PostDetailScreen` + componentes base (`PostListItem`, `SearchInput`, `EmptyState`, `LoadingView`, `ErrorView`). `feat: post list and detail`.
+   > Decisões: a busca chama os dois hooks (`useListPostsQuery` e `useSearchPostsQuery`) sempre, alternando via `skip` — regra dos hooks. O `Card` genérico do plano não foi escrito: virou `PostListItem`, específico, porque não havia um segundo consumidor para justificar a abstração.
+   >
+   > **`formatDate` é manual, sem `Intl`/`toLocaleDateString`:** o suporte a locale no Hermes depende de o build incluir ICU, e um device sem ICU cairia em inglês silenciosamente. Como o app formata no fuso local, os testes ficariam dependentes do relógio da máquina — o `jest.config.js` fixa `TZ=America/Sao_Paulo` para mantê-los determinísticos no CI.
+   >
+   > **`expo-asset` precisou ser instalado no topo:** ele só existia aninhado em `node_modules/expo/`, o que o Metro resolve mas o Jest não. Quebrava qualquer teste que renderizasse um ícone.
 8. **CP8** — `AdminHomeScreen` + `PostFormScreen` (create+edit) + delete com `Alert.alert`. `feat: admin posts management`.
 9. **CP9** — `ProfessorsListScreen` (FlatList paginada) + `ProfessorFormScreen`. `feat: professors screens`.
 10. **CP10** — `StudentsListScreen` + `StudentFormScreen`. `feat: students screens`.

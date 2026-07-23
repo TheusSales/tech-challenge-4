@@ -2,9 +2,9 @@
 
 App mobile em **React Native (Expo + TypeScript)** para a plataforma de blogging construída nas fases anteriores do Postech FullStack.
 
-> **Status:** `backend pronto — login implementado, demais telas em construção`
+> **Status:** `backend pronto — área pública e login prontos, admin em construção`
 >
-> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo tem store, navegação, tema, camada de API e a tela de login prontos; as telas de posts e dos CRUDs são placeholders. Ver [`docs/PLAN.md`](docs/PLAN.md).
+> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo tem store, navegação, tema, camada de API, login e a área pública de posts (lista com busca + detalhe) prontos; as telas administrativas ainda são placeholders. Ver [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Escopo
 
@@ -67,7 +67,7 @@ src/
   api/          RTK Query: baseQuery (Bearer + auto-logout em 401), um endpoint file por recurso
   store/        configureStore, authSlice, hydrate (restaura o token no boot)
   navigation/   RootNavigator → AppTabs → PostsStack | AdminStack | AuthStack
-  screens/      uma tela por item do enunciado (placeholders até o CP6)
+  screens/      uma tela por item do enunciado (as administrativas ainda são placeholders)
   components/   componentes base compartilhados
   hooks/        useDebounce (portado do TC3), useAuth + hooks tipados do Redux
   theme/        tokens de cor/spacing/tipografia portados do TC3
@@ -81,7 +81,7 @@ src/
 ### Verificação
 
 ```bash
-npm test             # 54 testes (jest-expo + React Native Testing Library)
+npm test             # 74 testes (jest-expo + React Native Testing Library)
 npm run typecheck    # tsc --noEmit
 ```
 

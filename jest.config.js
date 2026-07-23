@@ -1,3 +1,9 @@
+// O app formata datas no fuso local do aparelho, que é o comportamento certo
+// para o usuário — mas deixa os testes dependentes do relógio da máquina. Um
+// post das 00:24 UTC cai no dia anterior no Brasil. Fixar o fuso aqui mantém
+// os testes determinísticos em qualquer máquina e no CI.
+process.env.TZ = 'America/Sao_Paulo';
+
 /** @type {import('jest').Config} */
 module.exports = {
   preset: 'jest-expo',
