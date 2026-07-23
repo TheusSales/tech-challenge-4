@@ -122,7 +122,7 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP3 — professores + posts protegidos | ✅ concluído | `b25b3f5` (backend) |
 | CP4 — alunos | ✅ concluído | `3890c0e` (backend) |
 | — correção do seed | ✅ concluído | `dc36d89` (backend) |
-| CP5 — bootstrap Expo | ✅ concluído | `1092672` (tech-challenge-4) |
+| CP5 — bootstrap Expo | ✅ concluído | `bc50c80` (tech-challenge-4) |
 | CP6 — login + persistência | ⬜ **próximo** | — |
 | CP7–CP12 | ⬜ pendentes | — |
 
