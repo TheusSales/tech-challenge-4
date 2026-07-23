@@ -110,6 +110,23 @@ describe('criação', () => {
     expect(navigation.goBack).not.toHaveBeenCalled();
   });
 
+  // O usuário colou um lorem ipsum e levou 500 do backend, porque titulo é
+  // varchar(150) no banco. O campo agora corta no limite e mostra o contador.
+  it('não deixa digitar além do limite da coluna', async () => {
+    await renderScreen();
+
+    await user().type(screen.getByLabelText('Título'), 'a'.repeat(200));
+
+    expect(screen.getByLabelText('Título').props.value).toHaveLength(150);
+    expect(screen.getByText('150/150')).toBeTruthy();
+  });
+
+  it('mostra o contador do autor com o limite da coluna', async () => {
+    await renderScreen();
+
+    expect(screen.getByText(`${'Administrador FIAP'.length}/100`)).toBeTruthy();
+  });
+
   // Se a criação falha, ficar na tela preserva o texto já digitado.
   it('mostra o erro da API e permanece no formulário', async () => {
     respondWith(() => json(500, { message: 'Erro interno no servidor ao criar o post.' }));

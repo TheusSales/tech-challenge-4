@@ -13,6 +13,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { getApiErrorMessage } from '../utils/apiError';
 import { required } from '../utils/validators';
+import { LIMITES } from '../utils/limits';
 import type { AdminStackScreenProps } from '../navigation/types';
 import { theme } from '../theme';
 
@@ -100,6 +101,7 @@ export default function PostFormScreen({ route, navigation }: AdminStackScreenPr
               onBlur={onBlur}
               error={fieldState.error?.message}
               placeholder="Ex.: Introdução a hooks"
+              maxLength={LIMITES.post.titulo}
               returnKeyType="next"
             />
           )}
@@ -117,6 +119,7 @@ export default function PostFormScreen({ route, navigation }: AdminStackScreenPr
               onBlur={onBlur}
               error={fieldState.error?.message}
               placeholder="Nome de quem assina"
+              maxLength={LIMITES.post.autor}
               returnKeyType="next"
             />
           )}
