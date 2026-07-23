@@ -1,6 +1,7 @@
 import { api } from './index';
 import type { Student, StudentInput, StudentMutationResponse } from '../types/student';
 import type { Paginated, PageParams } from '../types/api';
+import { accumulatePages } from './accumulatePages';
 
 export const studentsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,6 +10,7 @@ export const studentsApi = api.injectEndpoints({
         url: '/students',
         params: { page, pageSize },
       }),
+      ...accumulatePages<Student>((student) => student.id),
       providesTags: (result) => [
         ...(result?.items ?? []).map(({ id }) => ({ type: 'Student' as const, id })),
         { type: 'Student' as const, id: 'LIST' },

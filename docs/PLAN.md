@@ -127,13 +127,14 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP7 — lista e detalhe de posts | ✅ concluído | `af5c913` (tech-challenge-4) |
 | CP8 — admin de posts | ✅ concluído | `40b6a07` (tech-challenge-4) |
 | CP9 — professores | ✅ concluído | `b162405` (tech-challenge-4) |
-| CP10–CP12 | ⬜ pendentes | — |
+| CP10 — alunos | ✅ concluído | `HEAD` (tech-challenge-4) |
+| CP11–CP12 | ⬜ pendentes | — |
 
-> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 116 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
+> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 137 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
 
 ### Testes (antecipados do CP11)
 
-Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **116 testes**, `npm test`.
+Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **137 testes**, `npm test`.
 
 Cobrem `authSlice`, validadores, tradução de erro da API, `useDebounce`, o fluxo de auth inteiro contra `fetch` mockado (injeção do Bearer, logout no 401, `hydrateAuth`) e a `LoginScreen` ponta a ponta. Os mocks usam respostas copiadas de chamadas reais, então mudança de contrato quebra os testes.
 
@@ -234,7 +235,10 @@ Backend primeiro (mobile bloqueia nele).
    > **Sobre papéis:** não há hierarquia, e isso é deliberado. O enunciado não prevê níveis de acesso — todo professor é administrador. Excluir outro professor é permitido; o único bloqueio é a auto-exclusão (409), que garante que sempre reste ao menos um professor com acesso ao sistema.
    >
    > **A senha é omitida do corpo, não enviada vazia.** O backend usa `COALESCE($3, password_hash)`, então mandar `""` sobrescreveria a senha com o hash de string vazia e trancaria o professor para fora. Verificado contra o Postgres real: editar sem senha mantém o login funcionando.
-10. **CP10** — `StudentsListScreen` + `StudentFormScreen`. `feat: students screens`.
+10. **CP10** ✅ — `StudentsListScreen` + `StudentFormScreen`. `feat: students screens`.
+   > Espelho de professores, sem senha e com o RA a mais. Reusa `PersonListItem` e `accumulatePages`, então a tela nasceu quase só de composição.
+   > 
+   > **O RA em branco vira `null`, não string vazia.** A coluna é nullable e a diferença importa: `''` guardaria "um RA vazio" em vez de "não informado", e a lista mostraria uma linha `RA ` solta. Verificado contra o Postgres real — o campo em branco grava `NULL`, e editar depois preenchendo o RA funciona.
 11. **CP11** — README + arquitetura + polimento (error boundary, 401 auto-logout QA). `docs: README and architecture`.
 12. **CP12** — gravar vídeo ≤15 min (roteiro: browse anônimo → login → admin CRUDs → logout → mostrar 401 handling → mostrar README).
 
