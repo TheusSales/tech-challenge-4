@@ -128,7 +128,7 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP8 — admin de posts | ✅ concluído | `40b6a07` (tech-challenge-4) |
 | CP9 — professores | ✅ concluído | `b162405` (tech-challenge-4) |
 | CP10 — alunos | ✅ concluído | `ee85c9c` (tech-challenge-4) |
-| CP11 — README e polimento | ✅ concluído | `HEAD` (tech-challenge-4) |
+| CP11 — README e polimento | ✅ concluído | `4ad67dc` (tech-challenge-4) |
 | CP12 — vídeo | ⬜ pendente | — |
 
 > **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 142 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
