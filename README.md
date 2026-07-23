@@ -2,9 +2,9 @@
 
 App mobile em **React Native (Expo + TypeScript)** para a plataforma de blogging construída nas fases anteriores do Postech FullStack.
 
-> **Status:** `backend pronto — área pública e login prontos, admin em construção`
+> **Status:** `backend pronto — área pública, login e admin de posts prontos`
 >
-> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo tem store, navegação, tema, camada de API, login e a área pública de posts (lista com busca + detalhe) prontos; as telas administrativas ainda são placeholders. Ver [`docs/PLAN.md`](docs/PLAN.md).
+> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo tem store, navegação, tema, camada de API, login, a área pública de posts (lista com busca + detalhe) e o painel administrativo de posts (listagem paginada, criar, editar e excluir). Faltam as telas de professores e alunos. Ver [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Escopo
 
@@ -81,7 +81,7 @@ src/
 ### Verificação
 
 ```bash
-npm test             # 74 testes (jest-expo + React Native Testing Library)
+npm test             # 95 testes (jest-expo + React Native Testing Library)
 npm run typecheck    # tsc --noEmit
 ```
 
