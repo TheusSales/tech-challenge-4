@@ -126,11 +126,11 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP6 — login + persistência | 🟡 código pronto, falta rodar em dispositivo | — |
 | CP7–CP12 | ⬜ pendentes | — |
 
-> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 46 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. O que falta para virar ✅: abrir o app, logar com `admin@fiap.com` / `admin123`, matar e reabrir para confirmar que o SecureStore devolve a sessão, e sair pelo botão "Sair".
+> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 54 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
 
 ### Testes (antecipados do CP11)
 
-Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **46 testes**, `npm test`.
+Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **54 testes**, `npm test`.
 
 Cobrem `authSlice`, validadores, tradução de erro da API, `useDebounce`, o fluxo de auth inteiro contra `fetch` mockado (injeção do Bearer, logout no 401, `hydrateAuth`) e a `LoginScreen` ponta a ponta. Os mocks usam respostas copiadas de chamadas reais, então mudança de contrato quebra os testes.
 
@@ -138,6 +138,10 @@ Cobrem `authSlice`, validadores, tradução de erro da API, `useDebounce`, o flu
 
 1. **`required('A senha')` gerava "A senha é obrigatório."** — concordância quebrada. A função montava a frase a partir do nome do campo. Passou a receber a mensagem pronta.
 2. **Errar a senha deixava a tela em branco.** O 401 de credencial inválida caía no mesmo caminho de "sessão expirada": disparava `logout`, o listener zerava o cache do RTK Query, e junto ia embora o erro da própria tentativa de login. O `baseQueryWithReauth` passou a só derrubar a sessão quando existe uma sessão e a requisição não é o próprio login. Coberto por teste de regressão nos dois níveis (store e tela), verificado revertendo a correção.
+
+**Terceiro bug, achado rodando no navegador:** o botão "Sair" não fazia nada — sem erro, sem diálogo. Causa: o `Alert.alert` do `react-native-web` é literalmente `static alert() {}`, uma função vazia. Todo `Alert.alert` do plano (incluindo as confirmações de exclusão previstas para o CP8) seria um clique morto no web. Passou a existir `src/utils/confirm.ts`, que usa `window.confirm` no web e `Alert.alert` no nativo, com as duas plataformas cobertas por teste.
+
+> **Regra para os próximos CPs:** nunca chamar `Alert.alert` direto — sempre `confirm()` de `src/utils/confirm.ts`. Nenhum teste pega a reintrodução de um `Alert.alert` cru num componente novo; isso é disciplina, não rede de segurança.
 
 Armadilhas do ambiente que valem registrar:
 

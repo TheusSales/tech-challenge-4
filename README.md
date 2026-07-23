@@ -81,7 +81,7 @@ src/
 ### Verificação
 
 ```bash
-npm test             # 46 testes (jest-expo + React Native Testing Library)
+npm test             # 54 testes (jest-expo + React Native Testing Library)
 npm run typecheck    # tsc --noEmit
 ```
 
