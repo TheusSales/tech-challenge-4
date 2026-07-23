@@ -128,13 +128,14 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP8 — admin de posts | ✅ concluído | `40b6a07` (tech-challenge-4) |
 | CP9 — professores | ✅ concluído | `b162405` (tech-challenge-4) |
 | CP10 — alunos | ✅ concluído | `ee85c9c` (tech-challenge-4) |
-| CP11–CP12 | ⬜ pendentes | — |
+| CP11 — README e polimento | ✅ concluído | `HEAD` (tech-challenge-4) |
+| CP12 — vídeo | ⬜ pendente | — |
 
-> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 137 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
+> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 142 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. Login, erro de credencial e logout já foram exercitados no navegador. O que falta para virar ✅ é o que só um dispositivo prova: matar e reabrir o app para confirmar que o `expo-secure-store` devolve a sessão — no navegador isso cai no fallback de `localStorage` e não vale.
 
 ### Testes (antecipados do CP11)
 
-Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **137 testes**, `npm test`.
+Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **142 testes**, `npm test`.
 
 Cobrem `authSlice`, validadores, tradução de erro da API, `useDebounce`, o fluxo de auth inteiro contra `fetch` mockado (injeção do Bearer, logout no 401, `hydrateAuth`) e a `LoginScreen` ponta a ponta. Os mocks usam respostas copiadas de chamadas reais, então mudança de contrato quebra os testes.
 
@@ -239,7 +240,14 @@ Backend primeiro (mobile bloqueia nele).
    > Espelho de professores, sem senha e com o RA a mais. Reusa `PersonListItem` e `accumulatePages`, então a tela nasceu quase só de composição.
    > 
    > **O RA em branco vira `null`, não string vazia.** A coluna é nullable e a diferença importa: `''` guardaria "um RA vazio" em vez de "não informado", e a lista mostraria uma linha `RA ` solta. Verificado contra o Postgres real — o campo em branco grava `NULL`, e editar depois preenchendo o RA funciona.
-11. **CP11** — README + arquitetura + polimento (error boundary, 401 auto-logout QA). `docs: README and architecture`.
+11. **CP11** ✅ — README + arquitetura + polimento. `docs: README and architecture`.
+   > README reescrito com diagrama de arquitetura (Mermaid, que o GitHub renderiza), tabela de telas mapeada ao enunciado e a seção **Relato de desafios** — obrigatória e escrita a partir dos bugs reais deste projeto, não de lugar-comum.
+   >
+   > `ErrorBoundary` no topo da árvore: erros de renderização não passam pelo tratamento das telas, e sem ele o React desmonta tudo e sobra tela branca. Fica **dentro** do `Provider`, para a tela de erro usar o tema e o "tentar de novo" reaproveitar o estado já carregado.
+   >
+   > `PlaceholderScreen` removido — virou código morto quando a última tela foi implementada.
+   >
+   > **QA do auto-logout em 401, contra o backend real:** um professor logado teve a conta excluída por outro; antes da exclusão `GET /posts/admin` respondia 200, depois passou a 401 — que é exatamente o gatilho do `baseQueryWithReauth`. A leitura pública seguiu em 200.
 12. **CP12** — gravar vídeo ≤15 min (roteiro: browse anônimo → login → admin CRUDs → logout → mostrar 401 handling → mostrar README).
 
 Regra em todos os commits (backend e mobile): **sem trailer `Co-Authored-By: Claude`**.
