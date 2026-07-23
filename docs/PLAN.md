@@ -126,7 +126,25 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP6 — login + persistência | 🟡 código pronto, falta rodar em dispositivo | — |
 | CP7–CP12 | ⬜ pendentes | — |
 
-> **CP6 está 🟡 e não ✅ de propósito.** O código do login está escrito e o bundle monta, mas **nada disso foi executado num emulador ou celular** — não há um disponível nesta máquina. O que foi verificado de verdade: os contratos da API (curl contra o backend rodando) e o grafo de módulos (`expo export`). O que falta: abrir o app, logar com `admin@fiap.com` / `admin123`, matar e reabrir o app para confirmar que o SecureStore devolve a sessão, e sair pelo botão "Sair". Só depois disso o CP6 vira ✅.
+> **CP6 está 🟡 e não ✅ de propósito.** O fluxo de autenticação agora tem 46 testes automatizados (ver abaixo) e o bundle monta, mas **nada foi executado num emulador ou celular** — não há um disponível nesta máquina. O que falta para virar ✅: abrir o app, logar com `admin@fiap.com` / `admin123`, matar e reabrir para confirmar que o SecureStore devolve a sessão, e sair pelo botão "Sair".
+
+### Testes (antecipados do CP11)
+
+Montados antes de seguir para o CP7, a pedido do usuário, para que as telas seguintes nasçam com rede de segurança. `jest-expo` + React Native Testing Library, **46 testes**, `npm test`.
+
+Cobrem `authSlice`, validadores, tradução de erro da API, `useDebounce`, o fluxo de auth inteiro contra `fetch` mockado (injeção do Bearer, logout no 401, `hydrateAuth`) e a `LoginScreen` ponta a ponta. Os mocks usam respostas copiadas de chamadas reais, então mudança de contrato quebra os testes.
+
+**Dois bugs reais foram encontrados ao escrever esses testes** — os dois invisíveis ao typecheck e ao bundle:
+
+1. **`required('A senha')` gerava "A senha é obrigatório."** — concordância quebrada. A função montava a frase a partir do nome do campo. Passou a receber a mensagem pronta.
+2. **Errar a senha deixava a tela em branco.** O 401 de credencial inválida caía no mesmo caminho de "sessão expirada": disparava `logout`, o listener zerava o cache do RTK Query, e junto ia embora o erro da própria tentativa de login. O `baseQueryWithReauth` passou a só derrubar a sessão quando existe uma sessão e a requisição não é o próprio login. Coberto por teste de regressão nos dois níveis (store e tela), verificado revertendo a correção.
+
+Armadilhas do ambiente que valem registrar:
+
+- **No RNTL 14, `render`, `renderHook`, `rerender` e `act` são assíncronos.** Sem `await`, `result.current` fica desatualizado e o teste mede a coisa errada, sem falhar por isso.
+- `transformIgnorePatterns` precisou incluir `immer`, `react-redux`, `redux`, `reselect` e `@reduxjs/toolkit`: o Jest carrega o build ESM deles.
+- `tsconfig.json` precisou de `"types": ["jest", "node"]` explícito; a inclusão automática de `@types` não estava pegando com o preset do Expo.
+- Queries do RTK Query agendam um timer de coleta de cache de 60s. Sem fake timers e `clearAllTimers`, ele dispara depois do teardown do Jest e polui a saída. Isso também revelou que o `hydrateAuth` nunca soltava a inscrição do `/auth/me` — corrigido no código do app, não só no teste.
 
 **Backend concluído e publicado** em `TheusSales/8fsdt-tech-challenge-2` (branch `main`). 77 testes verdes, CI do GitHub Actions passando. Todos os endpoints da Parte A foram validados contra um Postgres real — ver "Estado verificado" abaixo.
 

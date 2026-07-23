@@ -2,8 +2,10 @@
 // falhar. A regra final é sempre a do backend.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const required = (label: string) => (value: string | undefined) =>
-  value && value.trim().length > 0 ? true : `${label} é obrigatório.`;
+// Recebe a mensagem pronta, e não o nome do campo: montar "<campo> é
+// obrigatório" quebra a concordância em português ("A senha é obrigatório").
+export const required = (message: string) => (value: string | undefined) =>
+  value && value.trim().length > 0 ? true : message;
 
 export const validEmail = (value: string | undefined) =>
   value && EMAIL_RE.test(value.trim()) ? true : 'Informe um e-mail válido.';

@@ -18,11 +18,19 @@ export const hydrateAuth = () => async (dispatch: AppDispatch) => {
     // prepareHeaders monta o header Authorization.
     dispatch(tokenRestored(token));
 
-    const professor = await dispatch(authApi.endpoints.me.initiate()).unwrap();
-    dispatch(setCredentials({
-      token,
-      professor: { id: professor.id, name: professor.name, email: professor.email },
-    }));
+    // `initiate` fora de um componente cria uma inscrição que ninguém solta —
+    // ela mantém a entrada do cache viva indefinidamente. Como esta chamada é
+    // pontual, a inscrição é liberada assim que a resposta chega.
+    const request = dispatch(authApi.endpoints.me.initiate());
+    try {
+      const professor = await request.unwrap();
+      dispatch(setCredentials({
+        token,
+        professor: { id: professor.id, name: professor.name, email: professor.email },
+      }));
+    } finally {
+      request.unsubscribe();
+    }
   } catch {
     // O 401 já disparou o logout no baseQueryWithReauth; aqui só garantimos
     // que o storage não fique com um token morto em falhas de outro tipo.

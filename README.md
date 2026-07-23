@@ -65,8 +65,11 @@ src/
 ### Verificação
 
 ```bash
+npm test             # 46 testes (jest-expo + React Native Testing Library)
 npm run typecheck    # tsc --noEmit
 ```
+
+Os testes cobrem o `authSlice`, os validadores, a tradução de erro da API, o `useDebounce` e — o mais importante — o fluxo de autenticação inteiro contra um `fetch` mockado: injeção do Bearer, logout automático no 401, restauração da sessão no boot e a tela de login ponta a ponta. As respostas mockadas foram copiadas de chamadas reais ao backend seedado, então uma mudança de contrato quebra os testes.
 
 ## Backend
 

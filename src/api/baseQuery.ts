@@ -24,9 +24,15 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-// Um 401 em qualquer rota significa token expirado ou revogado (o backend
-// devolve 401 tanto para header ausente quanto para JWT inválido). Derruba a
-// sessão e limpa o SecureStore; o RootNavigator reage sozinho ao token sumir.
+// Um 401 numa sessão ativa significa token expirado ou revogado: derruba a
+// sessão e limpa o SecureStore, e o RootNavigator reage sozinho ao token sumir.
+//
+// Só que nem todo 401 é isso. O 401 do próprio login é "senha errada", e o de
+// quem nunca logou é só "não autorizado" — em nenhum dos dois há sessão para
+// derrubar. Tratar esses casos como expiração era pior que inútil: o logout
+// zera o cache da API (ver store/listeners.ts) e isso apagava a mensagem de
+// erro da própria tentativa de login, deixando a tela em branco depois de
+// errar a senha.
 export const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -34,7 +40,10 @@ export const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  if (result.error?.status === 401) {
+  const hadSession = (api.getState() as RootState).auth.token !== null;
+  const isLoginAttempt = api.endpoint === 'login';
+
+  if (result.error?.status === 401 && hadSession && !isLoginAttempt) {
     api.dispatch(logout());
     await clearToken();
   }

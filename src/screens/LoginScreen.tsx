@@ -60,7 +60,7 @@ export default function LoginScreen() {
         <Controller
           control={control}
           name="email"
-          rules={{ validate: { required: required('O e-mail'), validEmail } }}
+          rules={{ validate: { required: required('Informe o e-mail.'), validEmail } }}
           render={({ field: { onChange, onBlur, value }, fieldState }) => (
             <TextField
               label="E-mail"
@@ -82,7 +82,7 @@ export default function LoginScreen() {
         <Controller
           control={control}
           name="password"
-          rules={{ validate: { required: required('A senha') } }}
+          rules={{ validate: { required: required('Informe a senha.') } }}
           render={({ field: { onChange, onBlur, value }, fieldState }) => (
             <TextField
               ref={passwordRef}
