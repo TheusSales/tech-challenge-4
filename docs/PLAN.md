@@ -147,11 +147,22 @@ Do CP5 (mobile):
 - **Login não é um navegador raiz separado.** A segunda aba alterna entre "Entrar" e "Admin" conforme o token. Trocar de aba em vez de trocar de navegador raiz preserva a pilha de posts em que o usuário estava.
 - **`react-native-gesture-handler`** entrou (dependência do React Navigation) e **`expo-secure-store` tem fallback para `localStorage` no web** — só para o `expo start --web` continuar utilizável; não é entrega segura nem plataforma alvo.
 - **Tokens do tema convertidos** de string CSS (`'1rem'`, `'8px'`) para número, e as `shadows` viraram o par `shadow*` do iOS + `elevation` do Android. `breakpoints` foram descartados (não há media query no RN).
-- ⚠️ **Os tipos em `src/types/` foram derivados lendo o código do backend, não do JSON real** — o Docker estava desligado ao fim do CP5. Os nomes em minúsculo de `posts` (`idpost`, `datacriacao`) vêm de o Postgres rebaixar identificadores não citados. **Conferir contra uma resposta real no CP6**, que é quando o app fala com a API pela primeira vez.
+- **Os tipos em `src/types/` foram conferidos contra o JSON real** da API (ver abaixo), não só contra o código do backend. Os nomes em minúsculo de `posts` (`idpost`, `datacriacao`) vêm de o Postgres rebaixar identificadores não citados — confirmado na resposta de verdade.
 
 ### Estado verificado (contra Postgres real, não mock)
 
 Login com `admin@fiap.com` / `admin123`; senha errada → 401; `/auth/me`, `/professors`, `/students` e `/posts/admin` paginados; CRUD de professor com e-mail duplicado → 409 e auto-exclusão → 409; update de professor **sem** senha preserva a senha atual (login segue funcionando); CRUD de aluno com `ra` opcional; create/edit/delete de post autenticado; leitura pública sem token → 200; escrita sem token → 401. Seed rodado duas vezes seguidas sem duplicar dados.
+
+**Contratos conferidos contra o JSON real ao fim do CP5** (não só contra o código): todos os tipos de `src/types/` batem campo a campo. Confirmações que valem registrar, porque o app depende delas:
+
+- `posts` chega com chaves minúsculas — `idpost`, `datacriacao` — e as datas como string ISO, não `Date`.
+- `students.ra` vem `null` (não ausente) quando não informado, o que justifica `string | null` em vez de opcional.
+- `POST`/`PUT` respondem `{message, post|professor|student}`; `DELETE` responde só `{message}`.
+- Listagens paginadas respondem `{items, page, pageSize, total}` nos três recursos.
+- **`GET /posts/search` responde 404 com `{message}` quando nada casa** — confirmado, é o que o `queryFn` de `searchPosts` traduz para `[]`.
+- Header ausente e token inválido respondem **401** com mensagens diferentes, mas o mesmo status — que é o gatilho do auto-logout no `baseQueryWithReauth`.
+
+Base de dados devolvida ao estado do seed depois do smoke (1 professor, 2 alunos, 4 posts).
 
 ---
 
