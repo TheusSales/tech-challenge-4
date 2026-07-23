@@ -122,8 +122,9 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP3 — professores + posts protegidos | ✅ concluído | `b25b3f5` (backend) |
 | CP4 — alunos | ✅ concluído | `3890c0e` (backend) |
 | — correção do seed | ✅ concluído | `dc36d89` (backend) |
-| CP5 — bootstrap Expo | ⬜ **próximo** | — |
-| CP6–CP12 | ⬜ pendentes | — |
+| CP5 — bootstrap Expo | ✅ concluído | `1092672` (tech-challenge-4) |
+| CP6 — login + persistência | ⬜ **próximo** | — |
+| CP7–CP12 | ⬜ pendentes | — |
 
 **Backend concluído e publicado** em `TheusSales/8fsdt-tech-challenge-2` (branch `main`). 77 testes verdes, CI do GitHub Actions passando. Todos os endpoints da Parte A foram validados contra um Postgres real — ver "Estado verificado" abaixo.
 
@@ -136,6 +137,17 @@ Registrados porque afetam quem for retomar o trabalho:
 - **`src/types/express.d.ts`** foi criado (não estava no plano) para tipar `req.professor` injetado pelo `requireAuth`.
 - **Bug corrigido no seed:** o `INSERT ... SELECT` com `WHERE NOT EXISTS` reutiliza `$1` em dois contextos e o Postgres recusava o parâmetro (`text` vs `varchar`). Exigiu casts explícitos. **Os testes não pegaram isso** porque mockam os models — lição a levar para o mobile: validar SQL com o banco de pé.
 - **`app.use(cors())`** estava pendente no working tree do backend e entrou junto no CP2; é necessário para o app mobile consumir a API.
+
+Do CP5 (mobile):
+
+- **Expo SDK 57 / RN 0.86 / React 19.2**, bem mais novo do que o plano assumia. Consequência prática: **`@expo/vector-icons` não vem mais embutido** no pacote `expo` e precisou de instalação explícita — o typecheck pegou isso.
+- **Sem path aliases (`@/…`)**: em projeto Expo sem Expo Router eles exigem ligar `experiments.tsconfigPaths`. Não vale o risco no bundler; os imports são relativos.
+- **Uma única `createApi`** (`src/api/index.ts`) com `injectEndpoints` nos arquivos por recurso, em vez de quatro APIs separadas como sugeria o esboço da Parte B2. Assim há um só reducer/middleware e as tags invalidam entre recursos.
+- **`GET /posts/search` responde 404 quando nada casa** com o termo, em vez de lista vazia. Se isso passasse direto, toda busca sem resultado apareceria como erro. `postsApi.searchPosts` usa `queryFn` para traduzir 404 → `[]`; outros status seguem como erro.
+- **Login não é um navegador raiz separado.** A segunda aba alterna entre "Entrar" e "Admin" conforme o token. Trocar de aba em vez de trocar de navegador raiz preserva a pilha de posts em que o usuário estava.
+- **`react-native-gesture-handler`** entrou (dependência do React Navigation) e **`expo-secure-store` tem fallback para `localStorage` no web** — só para o `expo start --web` continuar utilizável; não é entrega segura nem plataforma alvo.
+- **Tokens do tema convertidos** de string CSS (`'1rem'`, `'8px'`) para número, e as `shadows` viraram o par `shadow*` do iOS + `elevation` do Android. `breakpoints` foram descartados (não há media query no RN).
+- ⚠️ **Os tipos em `src/types/` foram derivados lendo o código do backend, não do JSON real** — o Docker estava desligado ao fim do CP5. Os nomes em minúsculo de `posts` (`idpost`, `datacriacao`) vêm de o Postgres rebaixar identificadores não citados. **Conferir contra uma resposta real no CP6**, que é quando o app fala com a API pela primeira vez.
 
 ### Estado verificado (contra Postgres real, não mock)
 
@@ -157,9 +169,10 @@ Backend primeiro (mobile bloqueia nele).
 2. **CP2** ✅ — models/controllers/routes de auth + seed + testes de auth. `feat: JWT auth with professor login`.
 3. **CP3** ✅ — Professors CRUD + `requireAuth` nos posts write + `GET /posts/admin` + testes. `feat: professors CRUD and protected post writes`.
 4. **CP4** ✅ — Students CRUD + testes. `feat: students CRUD`. Push do backend.
-5. **CP5** ⬅️ **próximo** — bootstrap Expo, store, navegadores vazios, theme portado, `useDebounce` portado, RTK Query base com Bearer. Primeiro push do app. `chore: bootstrap Expo app`.
-   > O repo já existe e já tem `README.md`, `docs/` e `.gitignore`. O `create-expo-app` espera diretório vazio — gerar em pasta temporária e **mesclar**, preservando o README e o `docs/`, e fundindo o `.gitignore` do Expo com o atual em vez de substituí-lo.
-6. **CP6** — `authSlice`, `authApi`, SecureStore + hydrate, `LoginScreen`, gate no RootNavigator. Testar contra backend seedado. `feat: professor login with JWT persistence`.
+5. **CP5** ✅ — bootstrap Expo, store, navegadores, theme portado, `useDebounce` portado, RTK Query base com Bearer. `chore: bootstrap Expo app`.
+   > Feito gerando o template em pasta temporária e mesclando, como planejado: `README.md` e `docs/` preservados, `.gitignore` fundido (ganhou `expo-env.d.ts`, `.kotlin/`, `*.pem` e passou a ignorar `/ios` e `/android` inteiros, que são gerados pelo `expo prebuild`). Verificado com `npx tsc --noEmit` e com um `expo export --platform android` completo (894 módulos empacotados).
+6. **CP6** ⬅️ **próximo** — `LoginScreen` com `react-hook-form` + `useLoginMutation`, gravação no SecureStore, e a **primeira conversa real com a API** — validar aí os tipos de `src/types/` contra o JSON de verdade. `feat: professor login with JWT persistence`.
+   > `authSlice`, `authApi`, `tokenStorage` e o thunk `hydrateAuth` já foram escritos no CP5; falta a tela e o teste ponta a ponta.
 7. **CP7** — `PostListScreen` (busca com debounce) + `PostDetailScreen` + componentes base (`ListItem`, `Card`, `EmptyState`, `LoadingView`, `ErrorView`). `feat: post list and detail`.
 8. **CP8** — `AdminHomeScreen` + `PostFormScreen` (create+edit) + delete com `Alert.alert`. `feat: admin posts management`.
 9. **CP9** — `ProfessorsListScreen` (FlatList paginada) + `ProfessorFormScreen`. `feat: professors screens`.

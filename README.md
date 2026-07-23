@@ -2,9 +2,9 @@
 
 App mobile em **React Native (Expo + TypeScript)** para a plataforma de blogging construída nas fases anteriores do Postech FullStack.
 
-> **Status:** `backend pronto — app mobile não iniciado`
+> **Status:** `backend pronto — app com esqueleto navegável, telas em construção`
 >
-> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O próximo passo é o **CP5: bootstrap do projeto Expo**. Ver [`docs/PLAN.md`](docs/PLAN.md).
+> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo já tem store, navegação, tema e camada de API prontos; as telas são placeholders até o **CP6**. Ver [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Escopo
 
@@ -17,12 +17,56 @@ Interface mobile para docentes e alunos consumirem a API REST do blog:
 
 Detalhes técnicos, endpoints, checkpoints e verificação end-to-end em [`docs/PLAN.md`](docs/PLAN.md).
 
-## Stack planejada
+## Stack
 
-- **Expo** (managed) + **TypeScript**
-- **React Navigation** (native-stack + bottom-tabs)
+- **Expo SDK 57** (managed) + **TypeScript**, React Native 0.86
+- **React Navigation 7** (native-stack + bottom-tabs)
 - **Redux Toolkit** + **RTK Query**
 - **expo-secure-store** (JWT), **react-hook-form** (formulários)
+
+## Rodando o app
+
+```bash
+npm install
+cp .env.example .env      # ajuste EXPO_PUBLIC_API_URL conforme a plataforma
+npx expo start            # depois: i (iOS), a (Android) ou QR code no Expo Go
+```
+
+O backend precisa estar de pé — ver a seção abaixo.
+
+### `EXPO_PUBLIC_API_URL` por plataforma
+
+| Onde o app roda | Valor |
+|---|---|
+| Simulador iOS | `http://localhost:3000` |
+| Emulador Android | `http://10.0.2.2:3000` |
+| Celular físico (Expo Go) | `http://<IP-da-máquina-na-LAN>:3000` |
+
+`localhost` dentro do emulador Android aponta para o próprio emulador, não para a sua máquina — daí o `10.0.2.2`. Para celular físico, alternativa sem descobrir IP: `npx expo start --tunnel`.
+
+## Estrutura
+
+```
+src/
+  api/          RTK Query: baseQuery (Bearer + auto-logout em 401), um endpoint file por recurso
+  store/        configureStore, authSlice, hydrate (restaura o token no boot)
+  navigation/   RootNavigator → AppTabs → PostsStack | AdminStack | AuthStack
+  screens/      uma tela por item do enunciado (placeholders até o CP6)
+  components/   componentes base compartilhados
+  hooks/        useDebounce (portado do TC3), useAuth + hooks tipados do Redux
+  theme/        tokens de cor/spacing/tipografia portados do TC3
+  types/        contratos espelhando as respostas do backend
+```
+
+### Fluxo de autenticação
+
+`Login` → `useLoginMutation` → token no `authSlice` + `SecureStore`. Toda requisição passa pelo `prepareHeaders`, que injeta `Authorization: Bearer`. Qualquer resposta **401** dispara `logout()` e limpa o `SecureStore` — a aba "Admin" some sozinha e vira "Entrar", sem tratamento espalhado pelas telas. No boot, o `hydrateAuth` lê o token guardado e confirma com `GET /auth/me` antes de considerar a sessão válida.
+
+### Verificação
+
+```bash
+npm run typecheck    # tsc --noEmit
+```
 
 ## Backend
 
@@ -62,8 +106,8 @@ Rotas protegidas exigem `Authorization: Bearer <token>`. Credenciais do seed: **
    curl -sX POST localhost:3000/auth/login -H 'content-type: application/json' \
         -d '{"email":"admin@fiap.com","password":"admin123"}'
    ```
-4. **Siga o CP5** em [`docs/PLAN.md`](docs/PLAN.md) — atenção à nota sobre não deixar o `create-expo-app` sobrescrever este README e o `.gitignore`.
+4. **Suba o app** (`npm install && cp .env.example .env && npx expo start`) e siga o **CP6** em [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Próximos passos
 
-Ver `docs/PLAN.md`, seção **Parte C — Ordem de execução**. CP0–CP4 concluídos; CP5–CP12 pendentes.
+Ver `docs/PLAN.md`, seção **Parte C — Ordem de execução**. CP0–CP5 concluídos; CP6–CP12 pendentes.

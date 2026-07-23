@@ -15,21 +15,19 @@ yarn-error.log*
 .expo-shared/
 dist/
 web-build/
+expo-env.d.ts
 *.jks
 *.p8
 *.p12
 *.key
+*.pem
 *.mobileprovision
 *.orig.*
 
-# Native
-android/app/build/
-android/build/
-android/.gradle/
-android/local.properties
-ios/build/
-ios/Pods/
-ios/*.xcworkspace
+# Native — projeto managed: /ios e /android são gerados pelo `expo prebuild`
+/ios
+/android
+.kotlin/
 DerivedData/
 
 # Metro
