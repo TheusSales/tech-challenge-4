@@ -29,7 +29,7 @@ Detalhes técnicos, endpoints, checkpoints e verificação end-to-end em [`docs/
 ```bash
 npm install
 cp .env.example .env      # ajuste EXPO_PUBLIC_API_URL conforme a plataforma
-npx expo start            # depois: i (iOS), a (Android) ou QR code no Expo Go
+npx expo start            # depois: w (navegador), a (Android), i (iOS) ou QR no Expo Go
 ```
 
 O backend precisa estar de pé — ver a seção abaixo.
@@ -38,11 +38,27 @@ O backend precisa estar de pé — ver a seção abaixo.
 
 | Onde o app roda | Valor |
 |---|---|
+| Navegador (`w`) | `http://localhost:3000` |
 | Simulador iOS | `http://localhost:3000` |
 | Emulador Android | `http://10.0.2.2:3000` |
 | Celular físico (Expo Go) | `http://<IP-da-máquina-na-LAN>:3000` |
 
-`localhost` dentro do emulador Android aponta para o próprio emulador, não para a sua máquina — daí o `10.0.2.2`. Para celular físico, alternativa sem descobrir IP: `npx expo start --tunnel`.
+`localhost` dentro do emulador Android aponta para o próprio emulador, não para a sua máquina — daí o `10.0.2.2`.
+
+> **Desenvolvendo no WSL?** Em modo NAT (o padrão), o IP do WSL não é visível para o resto da rede: **o QR code não funciona no celular**, porque ele não alcança nem o Metro nem a API. Saídas, em ordem de esforço:
+>
+> 1. **Navegador** (`npx expo start` e tecla `w`) — tudo roda na máquina e `localhost:3000` funciona. Ressalva: no web o `expo-secure-store` não existe e o app cai num fallback de `localStorage`, então isso **não** valida a persistência real do token.
+> 2. **Port proxy no Windows** (PowerShell como administrador), que é o que libera o celular de verdade:
+>    ```powershell
+>    netsh interface portproxy add v4tov4 listenport=8081 listenaddress=0.0.0.0 connectport=8081 connectaddress=<IP-do-WSL>
+>    netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 connectport=3000 connectaddress=<IP-do-WSL>
+>    ```
+>    Depois aponte o `EXPO_PUBLIC_API_URL` para o IP do **Windows** na LAN. O IP do WSL sai de `hostname -I`.
+> 3. **`networkingMode=mirrored`** no `.wslconfig`, que faz o WSL compartilhar a rede do Windows e dispensa o proxy.
+>
+> `npx expo start --tunnel` resolve só o Metro — o celular continua sem alcançar a API.
+
+Trocar o `.env` exige reiniciar o Metro: as variáveis `EXPO_PUBLIC_*` são embutidas no bundle.
 
 ## Estrutura
 
