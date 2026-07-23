@@ -7,6 +7,7 @@ import ProfessorsListScreen from '../screens/ProfessorsListScreen';
 import ProfessorFormScreen from '../screens/ProfessorFormScreen';
 import StudentsListScreen from '../screens/StudentsListScreen';
 import StudentFormScreen from '../screens/StudentFormScreen';
+import { LogoutButton } from '../components/LogoutButton';
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
 
@@ -14,7 +15,11 @@ const Stack = createNativeStackNavigator<AdminStackParamList>();
 export function AdminStack() {
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen name="AdminHome" component={AdminHomeScreen} options={{ title: 'Administração' }} />
+      <Stack.Screen
+        name="AdminHome"
+        component={AdminHomeScreen}
+        options={{ title: 'Administração', headerRight: () => <LogoutButton /> }}
+      />
       <Stack.Screen name="PostForm" component={PostFormScreen} options={{ title: 'Post' }} />
       <Stack.Screen name="ProfessorsList" component={ProfessorsListScreen} options={{ title: 'Professores' }} />
       <Stack.Screen name="ProfessorForm" component={ProfessorFormScreen} options={{ title: 'Professor' }} />

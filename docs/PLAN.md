@@ -123,8 +123,10 @@ Prereqs, install, running (`npx expo start` + `i`/`a`/QR), env vars (tabela plat
 | CP4 — alunos | ✅ concluído | `3890c0e` (backend) |
 | — correção do seed | ✅ concluído | `dc36d89` (backend) |
 | CP5 — bootstrap Expo | ✅ concluído | `bc50c80` (tech-challenge-4) |
-| CP6 — login + persistência | ⬜ **próximo** | — |
+| CP6 — login + persistência | 🟡 código pronto, falta rodar em dispositivo | — |
 | CP7–CP12 | ⬜ pendentes | — |
+
+> **CP6 está 🟡 e não ✅ de propósito.** O código do login está escrito e o bundle monta, mas **nada disso foi executado num emulador ou celular** — não há um disponível nesta máquina. O que foi verificado de verdade: os contratos da API (curl contra o backend rodando) e o grafo de módulos (`expo export`). O que falta: abrir o app, logar com `admin@fiap.com` / `admin123`, matar e reabrir o app para confirmar que o SecureStore devolve a sessão, e sair pelo botão "Sair". Só depois disso o CP6 vira ✅.
 
 **Backend concluído e publicado** em `TheusSales/8fsdt-tech-challenge-2` (branch `main`). 77 testes verdes, CI do GitHub Actions passando. Todos os endpoints da Parte A foram validados contra um Postgres real — ver "Estado verificado" abaixo.
 
@@ -182,8 +184,9 @@ Backend primeiro (mobile bloqueia nele).
 4. **CP4** ✅ — Students CRUD + testes. `feat: students CRUD`. Push do backend.
 5. **CP5** ✅ — bootstrap Expo, store, navegadores, theme portado, `useDebounce` portado, RTK Query base com Bearer. `chore: bootstrap Expo app`.
    > Feito gerando o template em pasta temporária e mesclando, como planejado: `README.md` e `docs/` preservados, `.gitignore` fundido (ganhou `expo-env.d.ts`, `.kotlin/`, `*.pem` e passou a ignorar `/ios` e `/android` inteiros, que são gerados pelo `expo prebuild`). Verificado com `npx tsc --noEmit` e com um `expo export --platform android` completo (894 módulos empacotados).
-6. **CP6** ⬅️ **próximo** — `LoginScreen` com `react-hook-form` + `useLoginMutation`, gravação no SecureStore, e a **primeira conversa real com a API** — validar aí os tipos de `src/types/` contra o JSON de verdade. `feat: professor login with JWT persistence`.
-   > `authSlice`, `authApi`, `tokenStorage` e o thunk `hydrateAuth` já foram escritos no CP5; falta a tela e o teste ponta a ponta.
+6. **CP6** 🟡 — `LoginScreen` com `react-hook-form` + `useLoginMutation`, gravação no SecureStore, botão "Sair" no cabeçalho do admin. `feat: professor login with JWT persistence`.
+   > Decisão: o descarte do cache do RTK Query no logout ficou num **listener middleware** que reage à action `logout` (`src/store/listeners.ts`), e não no botão. Assim vale também para o logout automático do 401, sem duplicar a lógica. A alternativa (interceptar a action no reducer raiz) exigia um cast feio, porque zerar a fatia da API sem zerar `auth` não é expressável nos tipos do `combineReducers` — se fosse zerado tudo, `hydrating` voltaria a `true` e o app travaria no spinner.
+   > Falta o teste em dispositivo — ver a nota na tabela de progresso.
 7. **CP7** — `PostListScreen` (busca com debounce) + `PostDetailScreen` + componentes base (`ListItem`, `Card`, `EmptyState`, `LoadingView`, `ErrorView`). `feat: post list and detail`.
 8. **CP8** — `AdminHomeScreen` + `PostFormScreen` (create+edit) + delete com `Alert.alert`. `feat: admin posts management`.
 9. **CP9** — `ProfessorsListScreen` (FlatList paginada) + `ProfessorFormScreen`. `feat: professors screens`.

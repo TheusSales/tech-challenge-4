@@ -2,9 +2,9 @@
 
 App mobile em **React Native (Expo + TypeScript)** para a plataforma de blogging construída nas fases anteriores do Postech FullStack.
 
-> **Status:** `backend pronto — app com esqueleto navegável, telas em construção`
+> **Status:** `backend pronto — login implementado, demais telas em construção`
 >
-> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo já tem store, navegação, tema e camada de API prontos; as telas são placeholders até o **CP6**. Ver [`docs/PLAN.md`](docs/PLAN.md).
+> A API já expõe tudo que o app precisa (auth JWT, professores, alunos, posts protegidos e paginados) e está publicada. O app Expo tem store, navegação, tema, camada de API e a tela de login prontos; as telas de posts e dos CRUDs são placeholders. Ver [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Escopo
 
