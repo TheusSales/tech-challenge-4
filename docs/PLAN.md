@@ -229,6 +229,10 @@ Backend primeiro (mobile bloqueia nele).
 9. **CP9** ✅ — `ProfessorsListScreen` (FlatList paginada) + `ProfessorFormScreen`. `feat: professors screens`.
    > A paginação acumulada do CP8 virou `src/api/accumulatePages.ts`, já que passou a valer para posts, professores e alunos. O `PersonListItem` também é compartilhado com o CP10 — professores e alunos só diferem por um campo.
    >
+   > **Bug de segurança achado testando esta tela.** O usuário, logado como um professor comum, conseguiu excluir a conta admin — e o relato levou a uma checagem que revelou algo pior: o `requireAuth` só validava a assinatura do JWT, nunca se o professor ainda existia. Um professor excluído seguia criando posts e apagando outros professores por até 8h (a validade do token). Confirmado na prática: após o `DELETE`, o mesmo token respondia 200 em `GET /professors` e 201 em `POST /posts`; só o `/auth/me` recusava, por ser o único ponto que consultava o banco. Corrigido no backend — ver `TheusSales/8fsdt-tech-challenge-2`, commit `6fdd9a4`.
+   >
+   > **Sobre papéis:** não há hierarquia, e isso é deliberado. O enunciado não prevê níveis de acesso — todo professor é administrador. Excluir outro professor é permitido; o único bloqueio é a auto-exclusão (409), que garante que sempre reste ao menos um professor com acesso ao sistema.
+   >
    > **A senha é omitida do corpo, não enviada vazia.** O backend usa `COALESCE($3, password_hash)`, então mandar `""` sobrescreveria a senha com o hash de string vazia e trancaria o professor para fora. Verificado contra o Postgres real: editar sem senha mantém o login funcionando.
 10. **CP10** — `StudentsListScreen` + `StudentFormScreen`. `feat: students screens`.
 11. **CP11** — README + arquitetura + polimento (error boundary, 401 auto-logout QA). `docs: README and architecture`.
