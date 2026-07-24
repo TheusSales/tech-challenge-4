@@ -197,7 +197,7 @@ Os problemas mais instrutivos desta fase não foram os de escrever tela, e sim o
 
 ## Vídeo de demonstração
 
-> _A ser publicado no CP12._
+> _A ser publicado no CP12._ Roteiro em [`docs/ROTEIRO_VIDEO.md`](docs/ROTEIRO_VIDEO.md).
 
 ## Documentação complementar
 
